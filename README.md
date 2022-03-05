@@ -20,42 +20,41 @@ npm install node-oop-worker-pool
 Use WorkersPool.Task() start tasl in a new thread, if there are more tasks then aviable workers it will wait in the quque.
 
 Example:
+
 ```ts
-import  ComputeService  from  "./computeService";
-import  WorkersPool  from  "node-oop-worker-pool";
+import ComputeService from "./computeService";
+import { WorkersPool } from "node-oop-worker-pool";
 
 
 (async () => {
 
-	const  promises = [];
-	for (const  data  of  Array.from(Array(100).keys())) {
-		const  task = workersPool.task(data, ComputeService.path);
-		promises.push(task);
-	}
+    const promises = [];
+    for (const data of Array.from(Array(100).keys())) {
+        const task = WorkersPool.runTask(data, ComputeService.path);
+        promises.push(task);
+    }
 
-	await  Promise.all(promises);
-	workersPool.destroy();
+    await Promise.all(promises);
+    WorkersPool.destroy();
 
 })();
-
 ```
 
 ### Worker file:
 Must inherit from **AbstractWorker**, and implement methos **run()** the method receive the data from the main file, and will also return the result to the main file.
 ```ts
-import { AbstractWorker } from  'node-oop-worker-pool';
+import { AbstractWorker } from 'node-oop-worker-pool';
 
-  
-export  default  class  ComputeService  extends  AbstractWorker {
+export default class ComputeService extends AbstractWorker {
 
-	static  path = __filename;
+    static path = __filename;
 
-	async  run(data: any): Promise<any> {
-		console.log("start " + data + " - ", data);
-		for (let  i = 0; i < 9999999999; i++);
-		return  "done" + data;
+    async run(data: any): Promise<any> {
+        console.log("start " + data + " - ", data);
+        for (let i = 0; i < 9999999999; i++);
+        return "done" + data;
+    }
 
-	}
 }
 ```
 
