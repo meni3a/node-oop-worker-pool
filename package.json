@@ -1,11 +1,15 @@
 {
   "name": "node-oop-worker-pool",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Worker Pool for Node.js",
   "files": [
     "dist/lib",
     "index.*"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meni3a/node-oop-worker-pool"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
