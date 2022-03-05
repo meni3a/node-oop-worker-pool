@@ -82,7 +82,7 @@ class WorkersPool {
         }
     }
 
-    Task(data: any, fileName: string) {
+    task(data: any, fileName: string) {
 
         return new Promise((resolve, reject) => {
             const taskData: ITaskData = {
@@ -119,5 +119,6 @@ class WorkersPool {
     }
 }
 
+const workerPool = WorkersPool.Instance;
 
-export default WorkersPool.Instance as WorkersPool;
+export {workerPool};

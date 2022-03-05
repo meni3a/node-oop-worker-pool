@@ -29,12 +29,12 @@ import  WorkersPool  from  "node-oop-worker-pool";
 
 	const  promises = [];
 	for (const  data  of  Array.from(Array(100).keys())) {
-		const  task = WorkersPool.Task(data, ComputeService.path);
+		const  task = workersPool.task(data, ComputeService.path);
 		promises.push(task);
 	}
 
 	await  Promise.all(promises);
-	WorkersPool.destroy();
+	workersPool.destroy();
 
 })();
 

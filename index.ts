@@ -1,2 +1,2 @@
-export * from './lib/WorkersPool'
-export * from './lib/AbstractWorker'
+export * from './dist/lib/WorkersPool'
+export * from './dist/lib/AbstractWorker'
