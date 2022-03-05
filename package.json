@@ -1,0 +1,22 @@
+{
+  "name": "node-oop-worker-pool",
+  "version": "1.0.0",
+  "description": "",
+  "files": [
+    "dist/lib",
+    "index.*"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.21"
+  }
+}

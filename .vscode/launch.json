@@ -1,0 +1,13 @@
+{"version": "0.2.0",
+    "configurations": [{
+    "type": "node",
+    "request": "launch",
+    "name": "Debug Pool MS",
+    "preLaunchTask": "typescript",
+    "program": "${workspaceFolder}/src/index.ts",
+    "cwd": "${workspaceFolder}",
+    "protocol": "inspector",
+    "console": "integratedTerminal",
+    "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+    "skipFiles": ["<node_internals>/**/*.js"]
+}]}
