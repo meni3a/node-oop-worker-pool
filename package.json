@@ -1,6 +1,6 @@
 {
   "name": "node-oop-worker-pool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Worker Pool for Node.js",
   "files": [
     "dist/lib",
