@@ -25,6 +25,14 @@ export class WorkerPool {
         return this._instance || (this._instance = new this());
     }
 
+    chunkArray(array:any[], chunk_size:number){
+        const results = [];
+        while (array.length) {
+            results.push(array.splice(0, chunk_size));
+        }
+        return results;
+    }
+
     setTotalAviableWorkers(num: number): void {
         if(this.numOfFreeWorkers===this.TOTAL_AVIABLE_WOREKERS){
             this.TOTAL_AVIABLE_WOREKERS = num;

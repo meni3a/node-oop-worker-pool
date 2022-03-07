@@ -66,6 +66,8 @@ export default class ComputeService extends AbstractWorker {
 
 - destroy() - Terminate all workers, force end of all tasks and empty the queue.
 
+- chunkArray() - Allows you to split array to chunks, in order to handle large array using workers.
+
 
 ##  License
 
