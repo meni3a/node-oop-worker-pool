@@ -3,25 +3,19 @@ import OS from 'os';
 import { IWorkerMessage } from "./IWorkerMessage";
 import { WorkerMessageType } from "./workerMessageType";
 import path from "path";
+import { ITaskData } from "./ITaskData";
 
-interface ITaskData {
-    fileName: string,
-    data: any,
-    resolve: ((value?: any | PromiseLike<any>) => void),
-    reject: (reason?: any) => void
-}
 
-class WorkersPool {
+export class WorkerPool {
 
-    private static _instance: WorkersPool;
+    private static _instance: WorkerPool;
 
     private workingWorkers = new Map<Worker, ITaskData>();
     private waitingTaskQueue: ITaskData[] = [];
 
     private TOTAL_AVIABLE_WOREKERS;
     private numOfFreeWorkers;
-    private stopProccessingTask = false;
-
+ 
     private constructor() {
         this.TOTAL_AVIABLE_WOREKERS = OS.cpus().length;
         this.numOfFreeWorkers = this.TOTAL_AVIABLE_WOREKERS;
@@ -31,7 +25,15 @@ class WorkersPool {
         return this._instance || (this._instance = new this());
     }
 
-
+    setTotalAviableWorkers(num: number): void {
+        if(this.numOfFreeWorkers===this.TOTAL_AVIABLE_WOREKERS){
+            this.TOTAL_AVIABLE_WOREKERS = num;
+            this.numOfFreeWorkers = this.TOTAL_AVIABLE_WOREKERS;
+        }
+        else{
+            throw new Error("Can't change total aviable workers, because there are working workers")
+        }
+    }
     private createWorker(taskData: ITaskData) {
         this.numOfFreeWorkers -= 1;
         const worker = new Worker(path.resolve(__dirname, './targetFile.js'));
@@ -73,9 +75,6 @@ class WorkersPool {
     }
 
     private handleFreeWorker() {
-        if (this.stopProccessingTask) {
-            return
-        }
         const currentData = this.waitingTaskQueue.pop();
         if (currentData) {
             this.createWorker(currentData)
@@ -107,11 +106,6 @@ class WorkersPool {
         this.clear();
     }
 
-    stop() {
-        this.stopProccessingTask = true;
-        this.clear();
-    }
-
     private clear() {
         this.workingWorkers = new Map<Worker, ITaskData>();
         this.waitingTaskQueue = []
@@ -119,5 +113,3 @@ class WorkersPool {
     }
 }
 
-
-export default WorkersPool.Instance;

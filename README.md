@@ -6,7 +6,7 @@ node-oop-worker-pool is a NodeJS library for dealing with multi threaded program
 
 ##  Installation
 
-Use the package manager [npm](https://www.npmjs.com/package/node-oop-worker-pool) to install splunk-logger.
+Use the package manager [npm](https://www.npmjs.com/package/node-oop-worker-pool) to install node-oop-worker-pool.
 
 ```bash
 
@@ -22,20 +22,21 @@ Use WorkersPool.Task() start tasl in a new thread, if there are more tasks then 
 Example:
 
 ```ts
+
+import { WorkerPool } from "node-oop-worker-pool";
 import ComputeService from "./computeService";
-import { WorkersPool } from "node-oop-worker-pool";
 
 
 (async () => {
-
+    
     const promises = [];
     for (const data of Array.from(Array(100).keys())) {
-        const task = WorkersPool.runTask(data, ComputeService.path);
+        const task = WorkerPool.runTask(data, ComputeService.path);
         promises.push(task);
     }
 
     await Promise.all(promises);
-    WorkersPool.destroy();
+    WorkerPool.destroy();
 
 })();
 ```
@@ -61,7 +62,7 @@ export default class ComputeService extends AbstractWorker {
 
 ##  Public method
 
-- stop() - Finsh all active tasks and then empty the queue.
+- setTotalAviableWorkers() - Change number of aviable workers.
 
 - destroy() - Terminate all workers, force end of all tasks and empty the queue.
 
