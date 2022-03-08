@@ -17,7 +17,7 @@ npm install node-oop-worker-pool
 ##  Usage
 ### Main file:
 
-Use WorkersPool.Task() start tasl in a new thread, if there are more tasks then aviable workers it will wait in the quque.
+Use WorkerPool.runTask() run task in a new thread, if there are more tasks then available workers it will wait in the queue.
 
 Example:
 
@@ -28,21 +28,76 @@ import ComputeService from "./computeService";
 
 
 (async () => {
-    
-    const promises = [];
-    for (const data of Array.from(Array(100).keys())) {
-        const task = WorkerPool.runTask(data, ComputeService.path);
-        promises.push(task);
-    }
 
-    await Promise.all(promises);
+    const dataToProcess : number[] = [1,2,3,4,5,6,7,8,9,10,11];
+ 
+	// wait all workers to finish
+    const result = await Promise.all(dataToProcess.map((data: number)=>{
+        return WorkerPool.runTask(data, ComputeService.path);
+    }));
+
+    console.log("finish all tasks", result);
+
     WorkerPool.destroy();
-
+    
 })();
+
+
 ```
 
 ### Worker file:
-Must inherit from **AbstractWorker**, and implement methos **run()** the method receive the data from the main file, and will also return the result to the main file.
+Must inherit from **AbstractWorker**, and implement the method **run()** the method receive the data from the main file, and will also return the result to the main file.
+
+```ts
+import { AbstractWorker } from 'node-oop-worker-pool';
+
+export default class ComputeService extends AbstractWorker {
+
+	// optional way to expose the path to the main file
+    static path = __filename;
+
+	// When the worker starts, this function will be called automatically.
+    run(data: number): Promise<boolean> {
+        console.log("start processing data: ", data);
+        // example of thread blocking task
+        for (let i = 0; i < 9999999999; i++);
+		// modified the data
+        const modifiedData = data*2;
+		//return data to main file
+        return modifiedData;
+    }
+
+}
+```
+##  Process data with chunks
+
+## Main file:
+```ts
+
+import WorkerPool from "node-oop-worker-pool";
+import ComputeService from "./computeService";
+
+
+(async () => {
+
+    const CHUNK_SIZE = 3;
+    const rawData : number[] = [1,2,3,4,5,6,7,8,9,10,11];
+    
+    const dataToProcess = WorkerPool.chunkArray(rawData, CHUNK_SIZE);
+
+    const result = await Promise.all(dataToProcess.map((data: number[])=>{
+        return WorkerPool.runTask(data, ComputeService.path);
+    }));
+
+    console.log("finish all tasks", result);
+
+    WorkerPool.destroy();
+    
+})();
+
+```
+### Worker file:
+
 ```ts
 import { AbstractWorker } from 'node-oop-worker-pool';
 
@@ -50,19 +105,44 @@ export default class ComputeService extends AbstractWorker {
 
     static path = __filename;
 
-    async run(data: any): Promise<any> {
-        console.log("start " + data + " - ", data);
-        for (let i = 0; i < 9999999999; i++);
-        return "done" + data;
+    run(chunk: number[]): Promise<boolean> {
+
+        console.log("start processing data: ", chunk);
+
+        const modifiedChunk = data.map((num: number)=>{
+            return this.processData(num);
+        });
+
+        return modifiedChunk;
     }
 
+    processData(data: number) : boolean{
+		if(!data){
+			return false;
+		}
+        for (let i = 0; i < 9999999999; i++);
+        return true;
+    }
 }
+```
+
+## Control max available workers:
+
+```ts
+import OS from 'os';
+
+//default
+WorkerPool.setTotalAvailableWorkers(OS.cpus().length);
+
+//custom
+WorkerPool.setTotalAvailableWorkers(30);
+
 ```
 
 
 ##  Public method
 
-- setTotalAviableWorkers() - Change number of aviable workers.
+- setTotalAvailableWorkers() - Change number of available workers.
 
 - destroy() - Terminate all workers, force end of all tasks and empty the queue.
 

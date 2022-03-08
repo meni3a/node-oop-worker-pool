@@ -1,6 +1,6 @@
 {
   "name": "node-oop-worker-pool",
-  "version": "1.0.21",
+  "version": "1.0.24",
   "description": "Worker Pool for Node.js",
   "files": [
     "dist/lib",
@@ -24,8 +24,5 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^17.0.21"
-  },
-  "dependencies": {
-    "reflect-metadata": "^0.1.13"
   }
 }

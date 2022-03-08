@@ -13,35 +13,18 @@ export class WorkerPool {
     private workingWorkers = new Map<Worker, ITaskData>();
     private waitingTaskQueue: ITaskData[] = [];
 
-    private TOTAL_AVIABLE_WOREKERS;
+    private TOTAL_AVAILABLE_WORKERS;
     private numOfFreeWorkers;
  
     private constructor() {
-        this.TOTAL_AVIABLE_WOREKERS = OS.cpus().length;
-        this.numOfFreeWorkers = this.TOTAL_AVIABLE_WOREKERS;
+        this.TOTAL_AVAILABLE_WORKERS = OS.cpus().length;
+        this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
     }
 
     public static get Instance() {
         return this._instance || (this._instance = new this());
     }
 
-    chunkArray(array:any[], chunk_size:number){
-        const results = [];
-        while (array.length) {
-            results.push(array.splice(0, chunk_size));
-        }
-        return results;
-    }
-
-    setTotalAviableWorkers(num: number): void {
-        if(this.numOfFreeWorkers===this.TOTAL_AVIABLE_WOREKERS){
-            this.TOTAL_AVIABLE_WOREKERS = num;
-            this.numOfFreeWorkers = this.TOTAL_AVIABLE_WOREKERS;
-        }
-        else{
-            throw new Error("Can't change total aviable workers, because there are working workers")
-        }
-    }
     private createWorker(taskData: ITaskData) {
         this.numOfFreeWorkers -= 1;
         const worker = new Worker(path.resolve(__dirname, './targetFile.js'));
@@ -62,7 +45,6 @@ export class WorkerPool {
 
         worker
             .on("message", (result) => {
-                console.log(result)
                 this.handleEndOfTask(worker)?.resolve(result);
             })
             .on("error", (err) => {
@@ -117,7 +99,25 @@ export class WorkerPool {
     private clear() {
         this.workingWorkers = new Map<Worker, ITaskData>();
         this.waitingTaskQueue = []
-        this.numOfFreeWorkers = this.TOTAL_AVIABLE_WOREKERS;
+        this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
+    }
+
+    chunkArray(array:any[], chunk_size:number){
+        const results = [];
+        while (array.length) {
+            results.push(array.splice(0, chunk_size));
+        }
+        return results;
+    }
+
+    setTotalAvailableWorkers(num: number): void {
+        if(this.numOfFreeWorkers===this.TOTAL_AVAILABLE_WORKERS){
+            this.TOTAL_AVAILABLE_WORKERS = num;
+            this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
+        }
+        else{
+            throw new Error("Can't change total available workers, because there are working workers")
+        }
     }
 }
 
