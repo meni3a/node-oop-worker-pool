@@ -23,25 +23,27 @@ Example:
 
 ```ts
 
-import { WorkerPool } from "node-oop-worker-pool";
+import WorkerPool from "node-oop-worker-pool";
 import ComputeService from "./computeService";
 
+class MainService{
 
-(async () => {
-
-    const dataToProcess : number[] = [1,2,3,4,5,6,7,8,9,10,11];
- 
-	// wait all workers to finish
-    const result = await Promise.all(dataToProcess.map((data: number)=>{
-        return WorkerPool.runTask(data, ComputeService.path);
-    }));
-
-    console.log("finish all tasks", result);
-
-    WorkerPool.destroy();
+    async handleCPUIntensiveTask(dataToProcess: number[]){ 
+        
+        // wait all workers to finish
+        const result = await Promise.all(dataToProcess.map((data: number)=>{
+            return WorkerPool.runTask(data, ComputeService.path);
+        }));
     
-})();
+        console.log("finish all tasks", result);
+    
+        WorkerPool.destroy();
+    }
+	
+}
 
+const mainService = new MainService();
+mainService.handleCPUIntensiveTask([1,2,3,4,5,6,7,8,9,10,11]);
 
 ```
 
@@ -57,7 +59,7 @@ export default class ComputeService extends AbstractWorker {
     static path = __filename;
 
 	// when the worker starts, this function will be called automatically.
-    run(data: number): Promise<boolean> {
+    async run(data: number): Promise<number> {
         console.log("start processing data: ", data);
         // example of thread blocking task
         for (let i = 0; i < 9999999999; i++);
@@ -72,40 +74,32 @@ export default class ComputeService extends AbstractWorker {
 ##  Process data with chunks
 
 ## Main file:
+
 ```ts
 
-import WorkerPool from "node-oop-worker-pool";
-import ComputeService from "./computeService";
+const CHUNK_SIZE = 3;
+const rawData : number[] = [1,2,3,4,5,6,7,8,9,10,11];
 
+const dataToProcess = WorkerPool.chunkArray(rawData, CHUNK_SIZE);
 
-(async () => {
+const result = await Promise.all(dataToProcess.map((data: number[])=>{
+	return WorkerPool.runTask(data, ComputeService.path);
+}));
 
-    const CHUNK_SIZE = 3;
-    const rawData : number[] = [1,2,3,4,5,6,7,8,9,10,11];
+console.log("finish all tasks", result);
+
+WorkerPool.destroy();
     
-    const dataToProcess = WorkerPool.chunkArray(rawData, CHUNK_SIZE);
-
-    const result = await Promise.all(dataToProcess.map((data: number[])=>{
-        return WorkerPool.runTask(data, ComputeService.path);
-    }));
-
-    console.log("finish all tasks", result);
-
-    WorkerPool.destroy();
-    
-})();
 
 ```
 ### Worker file:
 
 ```ts
-import { AbstractWorker } from 'node-oop-worker-pool';
-
 export default class ComputeService extends AbstractWorker {
 
     static path = __filename;
 
-    run(chunk: number[]): Promise<boolean> {
+    async run(chunk: number[]): Promise<boolean[]> {
 
         console.log("start processing data: ", chunk);
 
