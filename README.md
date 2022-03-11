@@ -76,11 +76,12 @@ export default class ComputeService extends AbstractWorker {
 ## Main file:
 
 ```ts
+import { chunkArray } from "node-oop-worker-pool";
 
 const CHUNK_SIZE = 3;
 const rawData : number[] = [1,2,3,4,5,6,7,8,9,10,11];
 
-const dataToProcess = WorkerPool.chunkArray(rawData, CHUNK_SIZE);
+const dataToProcess = chunkArray(rawData, CHUNK_SIZE);
 
 const result = await Promise.all(dataToProcess.map((data: number[])=>{
 	return WorkerPool.runTask(data, ComputeService.path);
