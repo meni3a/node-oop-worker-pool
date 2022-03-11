@@ -1,6 +1,7 @@
-import { WorkerPool } from './lib/WorkerPool'
+import { WorkerPoolService } from './lib/services/workerPoolService';
 
-const workerPool = WorkerPool.Instance;
+const workerPool = WorkerPoolService.Instance;
+export {workerPool as WorkerPool};
 
-export default workerPool as WorkerPool;
-export * from './lib/AbstractWorker'
+export * from './lib/workers/AbstractWorker';
+export * from './lib/utils/util';

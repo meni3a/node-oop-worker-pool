@@ -1,11 +1,12 @@
 import { parentPort } from 'worker_threads';
-import { IWorkerMessage } from './IWorkerMessage';
-import { WorkerMessageType } from './workerMessageType';
+import { WorkerMessageType } from '../enums/workerMessageType';
+import { IWorkerMessage } from '../Interfaces/IWorkerMessage';
 
+export const targetWorkerConfigPath = __filename;
 
 (async () => {
     parentPort?.on("message", async (workerMessage: IWorkerMessage) => {
-        if (workerMessage.type == WorkerMessageType.Configure) {
+        if (workerMessage.type === WorkerMessageType.Configure) {
             const target = await import(workerMessage.content);
             new target.default();
         }

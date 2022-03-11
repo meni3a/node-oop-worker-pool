@@ -1,14 +1,14 @@
-import { Worker } from "worker_threads";
 import OS from 'os';
-import { IWorkerMessage } from "./IWorkerMessage";
-import { WorkerMessageType } from "./workerMessageType";
-import path from "path";
-import { ITaskData } from "./ITaskData";
+import { Worker } from "worker_threads";
+import { WorkerMessageType } from "../enums/workerMessageType";
+import { ITaskData } from "../Interfaces/ITaskData";
+import { IWorkerMessage } from "../Interfaces/IWorkerMessage";
+import { targetWorkerConfigPath } from "../workers/targetWorkerConfig";
 
 
-export class WorkerPool {
+export class WorkerPoolService {
 
-    private static _instance: WorkerPool;
+    private static _instance: WorkerPoolService;
 
     private workingWorkers = new Map<Worker, ITaskData>();
     private waitingTaskQueue: ITaskData[] = [];
@@ -27,7 +27,7 @@ export class WorkerPool {
 
     private createWorker(taskData: ITaskData) {
         this.numOfFreeWorkers -= 1;
-        const worker = new Worker(path.resolve(__dirname, './targetFile.js'));
+        const worker = new Worker(targetWorkerConfigPath);
         this.workingWorkers.set(worker, taskData)
 
         const configure: IWorkerMessage = {
@@ -100,14 +100,6 @@ export class WorkerPool {
         this.workingWorkers = new Map<Worker, ITaskData>();
         this.waitingTaskQueue = []
         this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
-    }
-
-    chunkArray(array:any[], chunk_size:number){
-        const results = [];
-        while (array.length) {
-            results.push(array.splice(0, chunk_size));
-        }
-        return results;
     }
 
     setTotalAvailableWorkers(num: number): void {

@@ -1,4 +1,5 @@
-import { WorkerMessageType } from "./workerMessageType";
+import { WorkerMessageType } from "../enums/workerMessageType";
+
 
 export interface IWorkerMessage {
     type: WorkerMessageType,

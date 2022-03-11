@@ -1,6 +1,6 @@
 {
   "name": "node-oop-worker-pool",
-  "version": "1.0.24",
+  "version": "1.0.30",
   "description": "Worker Pool for Node.js",
   "files": [
     "dist/lib",
@@ -16,10 +16,15 @@
   "scripts": {
     "pub": "npm run build && npm version --no-git-tag-version patch && npm publish",
     "build": "tsc",
-    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "node",
+    "worker",
+    "pool",
+    "thread",
+    "parallel"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {

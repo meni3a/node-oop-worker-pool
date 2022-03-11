@@ -23,7 +23,7 @@ Example:
 
 ```ts
 
-import WorkerPool from "node-oop-worker-pool";
+import { WorkerPool } from "node-oop-worker-pool";
 import ComputeService from "./computeService";
 
 class MainService{
@@ -48,7 +48,7 @@ mainService.handleCPUIntensiveTask([1,2,3,4,5,6,7,8,9,10,11]);
 ```
 
 ### Worker file:
-Must inherit from **AbstractWorker**, and implement the method **run()** the method receive the data from the main file, and will also return the result to the main file.
+Must inherit from **AbstractWorker**, and implement the method **runTask()** the method receive the data from the main file, and will also return the result to the main file.
 
 ```ts
 import { AbstractWorker } from 'node-oop-worker-pool';
@@ -59,12 +59,12 @@ export default class ComputeService extends AbstractWorker {
     static path = __filename;
 
 	// when the worker starts, this function will be called automatically.
-    async run(data: number): Promise<number> {
+    async runTask(data: number): Promise<number> {
         console.log("start processing data: ", data);
         // example of thread blocking task
         for (let i = 0; i < 9999999999; i++);
 		// modified the data
-        const modifiedData = data*2;
+        const modifiedData = data * 2;
 		//return data to main file
 		return modifiedData;
     }
@@ -99,7 +99,7 @@ export default class ComputeService extends AbstractWorker {
 
     static path = __filename;
 
-    async run(chunk: number[]): Promise<boolean[]> {
+    async runTask(chunk: number[]): Promise<boolean[]> {
 
         console.log("start processing data: ", chunk);
 
