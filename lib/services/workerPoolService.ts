@@ -1,24 +1,23 @@
 import OS from 'os';
-import { Worker } from "worker_threads";
 import { WorkerMessageType } from "../enums/workerMessageType";
 import { ITaskData } from "../Interfaces/ITaskData";
-import { IWorkerMessage } from "../Interfaces/IWorkerMessage";
-import { targetWorkerConfigPath } from "../workers/targetWorkerConfig";
+import { WorkerThread } from '../models/WorkerThread';
+import { WorkerEventType } from '../enums/WorkerEventType';
 
 
 export class WorkerPoolService {
 
     private static _instance: WorkerPoolService;
 
-    private workingWorkers = new Map<Worker, ITaskData>();
+    private workingWorkers = new Map<WorkerThread, ITaskData>();
     private waitingTaskQueue: ITaskData[] = [];
 
-    private TOTAL_AVAILABLE_WORKERS;
+    private totalAvailableWorkers;
     private numOfFreeWorkers;
- 
+
     private constructor() {
-        this.TOTAL_AVAILABLE_WORKERS = OS.cpus().length;
-        this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
+        this.totalAvailableWorkers = OS.cpus().length;
+        this.numOfFreeWorkers = this.totalAvailableWorkers;
     }
 
     public static get Instance() {
@@ -27,35 +26,33 @@ export class WorkerPoolService {
 
     private createWorker(taskData: ITaskData) {
         this.numOfFreeWorkers -= 1;
-        const worker = new Worker(targetWorkerConfigPath);
+        const worker = new WorkerThread(taskData.fileName);
         this.workingWorkers.set(worker, taskData)
 
-        const configure: IWorkerMessage = {
-            type: WorkerMessageType.Configure,
-            content: taskData.fileName
-        }
-
-        worker.postMessage(configure)
-
-        const data: IWorkerMessage = {
+        worker.postMessage({
             type: WorkerMessageType.Data,
             content: taskData.data
-        }
-        worker.postMessage(data);
+        });
 
         worker
-            .on("message", (result) => {
+            .on(WorkerEventType.Message, (result) => {
                 this.handleEndOfTask(worker)?.resolve(result);
             })
-            .on("error", (err) => {
+            .on(WorkerEventType.Error, (err) => {
                 console.log(err.message)
                 this.handleEndOfTask(worker)?.reject(err);
+            })
+            .on(WorkerEventType.Exit, (code) => {
+                if (code !== 0) {
+                    this.handleEndOfTask(worker)?.reject(new Error(`Worker exited with code ${code}`));
+                }
             });
 
         return worker;
     }
 
-    private handleEndOfTask(worker: Worker): ITaskData | undefined {
+
+    private handleEndOfTask(worker: WorkerThread): ITaskData | undefined {
         const workerData = this.workingWorkers.get(worker);
         this.workingWorkers.delete(worker);
         this.numOfFreeWorkers += 1;
@@ -90,24 +87,19 @@ export class WorkerPoolService {
     }
 
     destroy() {
-        for (let [worker, data] of this.workingWorkers) {
-            worker.terminate();
-        }
-        this.clear();
-    }
-
-    private clear() {
-        this.workingWorkers = new Map<Worker, ITaskData>();
+        for (const [worker, d] of this.workingWorkers) worker.terminate();
+        this.workingWorkers = new Map<WorkerThread, ITaskData>();
         this.waitingTaskQueue = []
-        this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
+        this.numOfFreeWorkers = this.totalAvailableWorkers;
     }
 
-    setTotalAvailableWorkers(num: number): void {
-        if(this.numOfFreeWorkers===this.TOTAL_AVAILABLE_WORKERS){
-            this.TOTAL_AVAILABLE_WORKERS = num;
-            this.numOfFreeWorkers = this.TOTAL_AVAILABLE_WORKERS;
+
+    setTotalAvailableWorkers(amount: number): void {
+        if (this.numOfFreeWorkers === this.totalAvailableWorkers) {
+            this.totalAvailableWorkers = amount;
+            this.numOfFreeWorkers = this.totalAvailableWorkers;
         }
-        else{
+        else {
             throw new Error("Can't change total available workers, because there are working workers")
         }
     }
